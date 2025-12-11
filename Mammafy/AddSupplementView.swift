@@ -9,6 +9,8 @@ struct AddSupplementView: View {
     @State private var dosage: String = ""
     @State private var instructions: String = ""
     @State private var time: Date = Date()
+    @State private var startDate: Date = Date()
+    @State private var endDate: Date = Calendar.current.date(byAdding: .day, value: 10, to: Date()) ?? Date()
     
     init(supplementToEdit: Supplement? = nil) {
         self.supplementToEdit = supplementToEdit
@@ -16,6 +18,8 @@ struct AddSupplementView: View {
         _dosage = State(initialValue: supplementToEdit?.dosage ?? "")
         _instructions = State(initialValue: supplementToEdit?.instructions ?? "")
         _time = State(initialValue: supplementToEdit?.time ?? Date())
+        _startDate = State(initialValue: supplementToEdit?.startDate ?? Date())
+        _endDate = State(initialValue: supplementToEdit?.endDate ?? Calendar.current.date(byAdding: .day, value: 10, to: Date()) ?? Date())
     }
     
     var body: some View {
@@ -32,13 +36,17 @@ struct AddSupplementView: View {
                         updated.dosage = dosage
                         updated.instructions = instructions
                         updated.time = time
+                        updated.startDate = startDate
+                        updated.endDate = endDate
                         SupplementManager.shared.updateFullSupplement(updated)
                     } else {
                         SupplementManager.shared.addSupplement(
                             name: name,
                             dosage: dosage,
                             instructions: instructions,
-                            time: time
+                            time: time,
+                            startDate: startDate,
+                            endDate: endDate
                         )
                     }
                     dismiss()
@@ -53,7 +61,7 @@ struct AddSupplementView: View {
                         instructions: $instructions
                     )
                     
-                    ScheduleForm(time: $time)
+                    ScheduleForm(time: $time, startDate: $startDate, endDate: $endDate)
                 }
                 .padding(.top)
             }
@@ -149,6 +157,8 @@ struct MedicationDetailsForm: View {
 
 struct ScheduleForm: View {
     @Binding var time: Date
+    @Binding var startDate: Date
+    @Binding var endDate: Date
     
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -157,21 +167,60 @@ struct ScheduleForm: View {
                 .foregroundColor(.gray)
                 .padding(.leading, 5)
             
-            HStack {
-                Text("Time")
-                    .font(.body)
-                    .fontWeight(.medium)
-                    .foregroundColor(.darkText)
+            VStack(spacing: 0) {
+                // Time
+                HStack {
+                    Text("Time")
+                        .font(.body)
+                        .fontWeight(.medium)
+                        .foregroundColor(.darkText)
+                    
+                    Spacer()
+                    
+                    DatePicker("", selection: $time, displayedComponents: .hourAndMinute)
+                        .labelsHidden()
+                        .padding(5)
+                        .background(Color.sageGreen.opacity(0.1))
+                        .cornerRadius(8)
+                }
+                .padding()
                 
-                Spacer()
+                Divider()
+                    .padding(.leading)
                 
-                DatePicker("", selection: $time, displayedComponents: .hourAndMinute)
-                    .labelsHidden()
-                    .padding(5)
-                    .background(Color.sageGreen.opacity(0.1))
-                    .cornerRadius(8)
+                // Start Date
+                HStack {
+                    Text("Start Date")
+                        .font(.body)
+                        .fontWeight(.medium)
+                        .foregroundColor(.darkText)
+                    
+                    Spacer()
+                    
+                    DatePicker("", selection: $startDate, displayedComponents: .date)
+                        .labelsHidden()
+                        .padding(5)
+                }
+                .padding()
+                
+                Divider()
+                    .padding(.leading)
+                
+                // End Date
+                HStack {
+                    Text("End Date")
+                        .font(.body)
+                        .fontWeight(.medium)
+                        .foregroundColor(.darkText)
+                    
+                    Spacer()
+                    
+                    DatePicker("", selection: $endDate, in: startDate..., displayedComponents: .date)
+                        .labelsHidden()
+                        .padding(5)
+                }
+                .padding()
             }
-            .padding()
             .background(Color.white)
             .cornerRadius(16)
             .overlay(

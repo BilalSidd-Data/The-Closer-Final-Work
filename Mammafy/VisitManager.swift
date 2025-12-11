@@ -42,12 +42,43 @@ class VisitManager: ObservableObject {
     // MARK: - Appointment Logic
     func scheduleAppointment(doctor: String, location: String, date: Date) {
         appointment = Appointment(doctorName: doctor, location: location, date: date)
+        
+        // 1. One day before
+        if let dayBefore = Calendar.current.date(byAdding: .day, value: -1, to: date) {
+            NotificationManager.shared.scheduleNotification(
+                id: "NextVisit_DayBefore",
+                title: "Appointment Tomorrow",
+                body: "Remember your appointment with \(doctor) tomorrow at \(DateFormatter.localizedString(from: date, dateStyle: .none, timeStyle: .short)).",
+                date: dayBefore
+            )
+        }
+        
+        // 2. Three hours before
+        if let threeHoursBefore = Calendar.current.date(byAdding: .hour, value: -3, to: date) {
+            NotificationManager.shared.scheduleNotification(
+                id: "NextVisit_3HoursBefore",
+                title: "Appointment Soon",
+                body: "You have an appointment with \(doctor) in 3 hours at \(location).",
+                date: threeHoursBefore
+            )
+        }
+        
+        // 3. Exact time
+        NotificationManager.shared.scheduleNotification(
+            id: "NextVisit_ExactTime",
+            title: "Appointment Now",
+            body: "It's time for your appointment with \(doctor) at \(location).",
+            date: date
+        )
     }
     
     func resetAppointment() {
         appointment = nil
         checklist.removeAll()
         questionsForDoctor = ""
+        NotificationManager.shared.cancelNotification(id: "NextVisit_DayBefore")
+        NotificationManager.shared.cancelNotification(id: "NextVisit_3HoursBefore")
+        NotificationManager.shared.cancelNotification(id: "NextVisit_ExactTime")
     }
     
     // MARK: - Checklist Logic

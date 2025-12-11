@@ -11,6 +11,9 @@ struct ContentView: View {
                 DateSelectionView()
             }
         }
+        .onAppear {
+            NotificationManager.shared.requestAuthorization()
+        }
     }
 }
 

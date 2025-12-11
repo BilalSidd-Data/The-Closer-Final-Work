@@ -21,11 +21,11 @@ struct DailyDoseScreen: View {
                     showAddSupplement = true
                 })
                 
-                if supplementManager.supplements.isEmpty {
+                if supplementManager.activeSupplements.isEmpty {
                     RoutineStartCard()
                 } else {
                     VStack(spacing: 15) {
-                        ForEach(supplementManager.supplements) { supplement in
+                        ForEach(supplementManager.activeSupplements) { supplement in
                             SupplementRow(supplement: supplement)
                                 .onTapGesture {
                                     supplementToEdit = supplement
@@ -314,9 +314,6 @@ struct SupplementRow: View {
                 }
                 Button("Missed") {
                     manager.updateStatus(for: supplement.id, status: .missed)
-                }
-                Button("Reset", role: .destructive) {
-                    manager.updateStatus(for: supplement.id, status: .pending)
                 }
                 Button("Cancel", role: .cancel) {}
             }
